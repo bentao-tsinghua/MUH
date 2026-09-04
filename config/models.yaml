@@ -1,0 +1,10 @@
+# Model registry.
+models:
+  1_llama:
+    final_data_dir: "1_final_data/1_final_data"
+  2_qwen3_30b:
+    final_data_dir: "1_final_data/1_final_data"
+  3_llama32_3b:
+    final_data_dir: "1_final_data/1_final_data"
+  4_qwen25_7b:
+    final_data_dir: "1_final_data/1_final_data"
