@@ -2,17 +2,23 @@
 
 from __future__ import annotations
 
-import bootstrap  # noqa: F401
+import sys
+from pathlib import Path
+
+_SRC = Path(__file__).resolve().parents[2]
+if str(_SRC) not in sys.path:
+    sys.path.insert(0, str(_SRC))
+
+import bootstrap  # noqa: E402,F401
 
 import argparse
 import json
 import math
-from pathlib import Path
 
 from tqdm import tqdm
 
 from cli import add_model_arg
-from paths import final_data_dir, metrics_dir
+from paths import metrics_dir, token_position_dir
 
 
 def calc_entropy(top_logprobs: list) -> float:
@@ -70,6 +76,8 @@ def calc_entity_entropy(logprobs: list, entropy_list: list, entities: list) -> l
 def run(input_dir: Path, output_dir: Path) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     files = sorted(input_dir.glob("*.jsonl"))
+    if not files:
+        raise SystemExit(f"No JSONL files in {input_dir}")
     for filename in tqdm(files, desc="ours get_metrics", unit="file"):
         out_path = output_dir / filename.name
         with filename.open("r", encoding="utf-8") as fin, out_path.open("w", encoding="utf-8") as fout:
@@ -100,8 +108,23 @@ def run(input_dir: Path, output_dir: Path) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="MUH ours: extract metrics.")
     add_model_arg(parser)
+    parser.add_argument(
+        "--input-dir",
+        type=Path,
+        default=None,
+        help="Defaults to the token-alignment output for this model.",
+    )
     args = parser.parse_args()
-    input_dir = final_data_dir(args.model)
+    input_dir = (
+        args.input_dir.expanduser().resolve()
+        if args.input_dir
+        else token_position_dir(args.model)
+    )
+    if not input_dir.is_dir():
+        raise SystemExit(
+            f"Missing input directory: {input_dir}\n"
+            "Run entity linking, token probability, similarity, and alignment first."
+        )
     output_dir = metrics_dir(args.model)
     run(input_dir, output_dir)
     print(f"Done. Output: {output_dir}")

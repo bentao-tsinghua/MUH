@@ -1,4 +1,4 @@
-"""Run MUH pipeline for one model: metrics → indicators → XGBoost."""
+"""Run MUH for one model: entities → token features → metrics → indicators → XGBoost."""
 
 from __future__ import annotations
 
@@ -16,6 +16,10 @@ if str(SRC) not in sys.path:
 from cli import add_model_arg  # noqa: E402
 
 STEPS = [
+    SRC / "methods" / "ours" / "get_entities.py",
+    SRC / "methods" / "ours" / "get_token_prob.py",
+    SRC / "methods" / "ours" / "get_token_sim.py",
+    SRC / "methods" / "ours" / "get_token_position.py",
     SRC / "methods" / "ours" / "get_metrics.py",
     SRC / "methods" / "ours" / "get_indicators.py",
     SRC / "methods" / "xgboost_train.py",
@@ -30,7 +34,7 @@ def subprocess_env() -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Run MUH for one model, reading from final_data."
+        description="Run MUH for one model, starting from labeled final_data JSONL."
     )
     add_model_arg(parser)
     args = parser.parse_args()

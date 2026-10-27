@@ -2,7 +2,14 @@
 
 from __future__ import annotations
 
-import bootstrap  # noqa: F401
+import sys
+from pathlib import Path
+
+_SRC = Path(__file__).resolve().parents[1]
+if str(_SRC) not in sys.path:
+    sys.path.insert(0, str(_SRC))
+
+import bootstrap  # noqa: E402,F401
 import argparse
 import json
 from typing import Any
